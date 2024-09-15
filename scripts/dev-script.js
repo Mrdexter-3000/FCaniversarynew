@@ -12,7 +12,7 @@ async function getOpenPort(port) {
   return port;
 }
 
-const nextPort = await getOpenPort(3000);
+const nextPort = await getOpenPort(3001);
 const debuggerPort = await getOpenPort(3010);
 let command = "npm";
 let args = ["run", "dev:monorepo"];
