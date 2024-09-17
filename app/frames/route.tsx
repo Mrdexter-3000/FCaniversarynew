@@ -46,38 +46,34 @@ function calculateAnniversary(createdAtTimestamp: number): string {
 }
 
 async function generatePNG(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = ''): Promise<Buffer> {
-  let svg: string;
-  if (isError) {
-    svg = `
-      <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
-        <rect width="600" height="400" fill="#f0f0f0"/>
-        <text x="300" y="180" font-family="Arial" font-size="24" fill="red" text-anchor="middle">An error occurred</text>
-        <text x="300" y="220" font-family="Arial" font-size="20" fill="black" text-anchor="middle">${errorMessage}</text>
-        <text x="300" y="260" font-family="Arial" font-size="20" fill="black" text-anchor="middle">Please try again</text>
-      </svg>
-    `;
-  } else if (!fid || !joinDate || !anniversary) {
-    svg = `
-      <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
-        <rect width="600" height="400" fill="#f0f0f0"/>
-        <text x="300" y="180" font-family="Arial" font-size="24" fill="black" text-anchor="middle">Welcome to Farcaster Anniversary Frame!</text>
-        <text x="300" y="220" font-family="Arial" font-size="20" fill="black" text-anchor="middle">Click the button to check your join date and anniversary.</text>
-      </svg>
-    `;
-  } else {
-    const isOG = parseInt(fid) < 20000;
-    svg = `
-      <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
-        <rect width="600" height="400" fill="#f0f0f0"/>
-        <text x="300" y="140" font-family="Arial" font-size="24" fill="black" text-anchor="middle">Your FID is ${fid}</text>
-        <text x="300" y="180" font-family="Arial" font-size="20" fill="black" text-anchor="middle">You joined Farcaster on ${joinDate}</text>
-        <text x="300" y="220" font-family="Arial" font-size="20" fill="black" text-anchor="middle">You've been on Farcaster for ${anniversary}</text>
-        ${isOG ? '<text x="300" y="260" font-family="Arial" font-size="24" font-weight="bold" fill="black" text-anchor="middle">You\'re OG!</text>' : ''}
-      </svg>
-    `;
-  }
+  const width = 1146;
+  const height = 600;
 
-  return await sharp(Buffer.from(svg)).png().toBuffer();
+  let svgContent = `
+    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#f0f0f0"/>
+      <style>
+        .text { font-family: Arial, sans-serif; fill: #333; }
+        .title { font-size: 48px; font-weight: bold; }
+        .info { font-size: 36px; }
+        .error { font-size: 24px; fill: #ff0000; }
+      </style>
+      ${isError 
+        ? `<text x="50%" y="50%" class="text error" text-anchor="middle">${errorMessage}</text>`
+        : fid
+          ? `
+            <text x="50%" y="150" class="text title" text-anchor="middle">Farcaster Anniversary</text>
+            <text x="50%" y="250" class="text info" text-anchor="middle">FID: ${fid}</text>
+            <text x="50%" y="350" class="text info" text-anchor="middle">Joined: ${joinDate}</text>
+            <text x="50%" y="450" class="text info" text-anchor="middle">Member for: ${anniversary}</text>
+          `
+          : `<text x="50%" y="300" class="text title" text-anchor="middle">Check Your Farcaster Anniversary</text>`
+      }
+    </svg>
+  `;
+
+  const svgBuffer = Buffer.from(svgContent);
+  return sharp(svgBuffer).png().toBuffer();
 }
 
 function clearCache(fid?: string) {
