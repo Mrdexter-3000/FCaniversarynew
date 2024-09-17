@@ -14,15 +14,18 @@ export function currentURL(pathname: string): URL {
 }
 
 export function appURL(): string {
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const customAppUrl = process.env.APP_URL;
   const vercelUrl = process.env.VERCEL_URL;
 
-  if (isDevelopment) {
-    return 'http://localhost:3001';
+  if (customAppUrl) {
+    return customAppUrl.startsWith('http') ? customAppUrl : `https://${customAppUrl}`;
   } else if (vercelUrl) {
     return `https://${vercelUrl}`;
+  } else if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3001';
   } else {
-    throw new Error('Unable to determine app URL');
+    console.warn('Unable to determine app URL, using fallback');
+    return 'https://fc-aniversary-v3.vercel.app';
   }
 }
 
