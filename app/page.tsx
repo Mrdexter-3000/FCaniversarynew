@@ -33,9 +33,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   return (
-    <div>
-      <h1>Welcome to Farcaster Anniversary Frame!</h1>
-      <p>This is a Frame to check your Farcaster join date and anniversary.</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <h1 className="text-4xl font-bold mb-4 text-blue-600">Welcome to Farcaster Anniversary Frame!</h1>
+      <p className="text-xl text-gray-700">This is a Frame to check your Farcaster join date and anniversary.</p>
     </div>
   );
 }
