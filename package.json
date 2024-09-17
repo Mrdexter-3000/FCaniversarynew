@@ -8,6 +8,7 @@
     "@next/font": "^14.2.12",
     "@vercel/og": "^0.6.2",
     "@vercel/speed-insights": "^1.0.12",
+    "canvas": "^2.11.2",
     "dotenv": "^16.4.5",
     "frames.js": "latest",
     "next": "latest",
