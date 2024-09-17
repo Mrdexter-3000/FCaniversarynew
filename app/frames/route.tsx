@@ -109,6 +109,7 @@ const handleRequest = frames(async (ctx) => {
           throw new Error("Invalid Farcaster Frame message: Missing FID");
         }
 
+        console.log(`Fetching data for FID: ${fid}`);
         const createdAtTimestamp = await getFarcasterUserData(fid.toString());
         if (createdAtTimestamp === null) {
           throw new Error("Unable to retrieve valid user data");
@@ -131,50 +132,51 @@ const handleRequest = frames(async (ctx) => {
             { label: "Share", action: "post" },
             { label: "Check Again", action: "post" },
           ],
-          ...(message.buttonIndex === 1 ? { postUrl: `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${shareUrl}` } : {}),
+          ...(message.buttonIndex === 1 ? { postUrl: `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}` } : {}),
           ogImage: `data:image/png;base64,${pngBase64}`,
           title: "My Farcaster Anniversary",
           description: `I joined Farcaster on ${joinDate} and have been a member for ${anniversary}!`,
         };
       } catch (error) {
         console.error("Error processing POST request:", error);
-        const errorPngBuffer = await generatePNG(null, null, null, true, (error as Error).message);
-        const errorPngBase64 = errorPngBuffer.toString('base64');
-        return {
-          image: `data:image/png;base64,${errorPngBase64}`,
-          buttons: [{ label: "Retry", action: "post" }],
-          ogImage: `data:image/png;base64,${errorPngBase64}`,
-          title: "Farcaster Anniversary Frame Error",
-          description: "An error occurred while processing your Farcaster anniversary information.",
-        };
+        return await handleError(error);
       }
     } else {
       // Initial frame content
-      const initialPngBuffer = await generatePNG(null, null, null);
-      const initialPngBase64 = initialPngBuffer.toString('base64');
-      return {
-        image: `data:image/png;base64,${initialPngBase64}`,
-        buttons: [
-          { label: "Check Anniversary", action: "post" },
-        ],
-        ogImage: `data:image/png;base64,${initialPngBase64}`,
-        title: "Check Your Farcaster Anniversary",
-        description: "Find out when you joined Farcaster and how long you've been a member!",
-      };
+      return await generateInitialFrame();
     }
   } catch (error) {
     console.error("Unhandled error in handleRequest:", error);
-    const errorPngBuffer = await generatePNG(null, null, null, true, 'An unexpected error occurred');
-    const errorPngBase64 = errorPngBuffer.toString('base64');
-    return {
-      image: `data:image/png;base64,${errorPngBase64}`,
-      buttons: [{ label: "Retry", action: "post" }],
-      ogImage: `data:image/png;base64,${errorPngBase64}`,
-      title: "Farcaster Anniversary Frame Error",
-      description: "An unexpected error occurred while processing your Farcaster anniversary information.",
-    };
+    return await handleError(error);
   }
 });
+
+async function handleError(error: unknown): Promise<any> {
+  const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+  const errorPngBuffer = await generatePNG(null, null, null, true, errorMessage);
+  const errorPngBase64 = errorPngBuffer.toString('base64');
+  return {
+    image: `data:image/png;base64,${errorPngBase64}`,
+    buttons: [{ label: "Retry", action: "post" }],
+    ogImage: `data:image/png;base64,${errorPngBase64}`,
+    title: "Farcaster Anniversary Frame Error",
+    description: "An error occurred while processing your Farcaster anniversary information.",
+  };
+}
+
+async function generateInitialFrame(): Promise<any> {
+  const initialPngBuffer = await generatePNG(null, null, null);
+  const initialPngBase64 = initialPngBuffer.toString('base64');
+  return {
+    image: `data:image/png;base64,${initialPngBase64}`,
+    buttons: [
+      { label: "Check Anniversary", action: "post" },
+    ],
+    ogImage: `data:image/png;base64,${initialPngBase64}`,
+    title: "Check Your Farcaster Anniversary",
+    description: "Find out when you joined Farcaster and how long you've been a member!",
+  };
+}
 
 export const GET = handleRequest;
 export const POST = handleRequest;
