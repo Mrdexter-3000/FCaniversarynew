@@ -3,7 +3,14 @@ import { Metadata } from "next";
 import { appURL } from "./utils";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const baseUrl = appURL();
+  let baseUrl;
+  try {
+    baseUrl = appURL();
+  } catch (error) {
+    console.warn("Unable to determine app URL, using fallback");
+    baseUrl = "http://localhost:3001/"; // Replace with a suitable fallback URL
+  }
+
   const frameMetadata = await fetchMetadata(
     new URL("/frames", baseUrl)
   );

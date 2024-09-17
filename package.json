@@ -1,21 +1,17 @@
 {
   "name": "fcaniversary",
-  "version": "0.1.0",
+  "version": "0.21.0",
   "private": true,
   "type": "module",
   "dependencies": {
-    "@airstack/frames": "^1.2.0",
-    "@farcaster/core": "^0.13.5",
+    "@airstack/node": "latest",
     "@vercel/og": "^0.6.2",
     "dotenv": "^16.4.5",
     "frames.js": "latest",
-    "graphql": "latest",
-    "graphql-request": "latest",
     "next": "latest",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "sharp": "^0.33.5",
-    "@airstack/node": "latest"
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@types/node": "latest",
@@ -33,4 +29,3 @@
     "node": ">=18.17.0"
   }
 }
-
