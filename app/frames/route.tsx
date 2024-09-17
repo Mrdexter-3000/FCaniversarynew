@@ -4,7 +4,6 @@ import { config } from "dotenv";
 import sharp from 'sharp';
 import { Buffer } from 'buffer';
 import { getFarcasterUserData } from "../getFacasterUserData";
-import { createCanvas, loadImage } from 'canvas';
 
 config();
 
@@ -46,56 +45,35 @@ function calculateAnniversary(createdAtTimestamp: number): string {
   return result.trim() || 'Today';
 }
 
-async function generatePNG(
-  screenType: 'splash' | 'score' | 'anniversary' | 'error',
-  data: { fid?: string; joinDate?: string; anniversary?: string; errorMessage?: string }
-): Promise<Buffer> {
+async function generatePNG(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = ''): Promise<Buffer> {
   const width = 1146;
   const height = 600;
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext('2d');
 
-  // Set background
-  ctx.fillStyle = '#f0f0f0';
-  ctx.fillRect(0, 0, width, height);
+  let svgContent = `
+    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#f0f0f0"/>
+      <style>
+        .text { font-family: Inter, sans-serif; fill: #333; }
+        .title { font-size: 48px; font-weight: bold; }
+        .info { font-size: 36px; }
+        .error { font-size: 24px; fill: #ff0000; }
+      </style>
+      ${isError 
+        ? `<text x="50%" y="50%" class="text error" text-anchor="middle">${errorMessage}</text>`
+        : fid
+          ? `
+            <text x="50%" y="150" class="text title" text-anchor="middle">Farcaster Anniversary</text>
+            <text x="50%" y="250" class="text info" text-anchor="middle">FID: ${fid}</text>
+            <text x="50%" y="350" class="text info" text-anchor="middle">Joined: ${joinDate}</text>
+            <text x="50%" y="450" class="text info" text-anchor="middle">Member for: ${anniversary}</text>
+          `
+          : `<text x="50%" y="300" class="text title" text-anchor="middle">Check Your Farcaster Anniversary</text>`
+      }
+    </svg>
+  `;
 
-  // Set text styles
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  switch (screenType) {
-    case 'splash':
-      ctx.fillStyle = '#333';
-      ctx.font = 'bold 48px Arial';
-      ctx.fillText('Welcome to Farcaster Anniversary', width / 2, height / 2);
-      ctx.font = '36px Arial';
-      ctx.fillText('Click to check your anniversary!', width / 2, height / 2 + 50);
-      break;
-    case 'score':
-      ctx.fillStyle = '#333';
-      ctx.font = 'bold 48px Arial';
-      ctx.fillText('Your Farcaster Score', width / 2, height / 3);
-      ctx.font = '36px Arial';
-      ctx.fillText(`FID: ${data.fid}`, width / 2, height / 2);
-      ctx.fillText(`Member for: ${data.anniversary}`, width / 2, height / 2 + 50);
-      break;
-    case 'anniversary':
-      ctx.fillStyle = '#333';
-      ctx.font = 'bold 48px Arial';
-      ctx.fillText('Farcaster Anniversary', width / 2, height / 5);
-      ctx.font = '36px Arial';
-      ctx.fillText(`FID: ${data.fid}`, width / 2, height / 3);
-      ctx.fillText(`Joined: ${data.joinDate}`, width / 2, height / 2);
-      ctx.fillText(`Member for: ${data.anniversary}`, width / 2, height / 1.5);
-      break;
-    case 'error':
-      ctx.fillStyle = '#ff0000';
-      ctx.font = '24px Arial';
-      ctx.fillText(data.errorMessage || 'An unexpected error occurred', width / 2, height / 2);
-      break;
-  }
-
-  return canvas.toBuffer('image/png');
+  const svgBuffer = Buffer.from(svgContent);
+  return sharp(svgBuffer).png().toBuffer();
 }
 
 function clearCache(fid?: string) {
@@ -142,25 +120,20 @@ const handleRequest = frames(async (ctx) => {
 
         console.log(`FID: ${fid}, Timestamp: ${createdAtTimestamp}, Join Date: ${joinDate}, Anniversary: ${anniversary}`);
 
-        const anniversaryPngBuffer = await generatePNG('anniversary', { fid: fid.toString(), joinDate, anniversary });
-        const anniversaryPngBase64 = anniversaryPngBuffer.toString('base64');
-
-        const scorePngBuffer = await generatePNG('score', { fid: fid.toString(), anniversary });
-        const scorePngBase64 = scorePngBuffer.toString('base64');
+        const pngBuffer = await generatePNG(fid.toString(), joinDate, anniversary);
+        const pngBase64 = pngBuffer.toString('base64');
 
         const shareText = `I joined Farcaster on ${joinDate} and have been a member for ${anniversary}! Check your Farcaster anniversary: `;
         const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL}/frames`;
 
         return {
-          image: `data:image/png;base64,${anniversaryPngBase64}`,
+          image: `data:image/png;base64,${pngBase64}`,
           buttons: [
-            { label: "View Score", action: "post" },
             { label: "Share", action: "post" },
             { label: "Check Again", action: "post" },
           ],
-          ...(message.buttonIndex === 1 ? { image: `data:image/png;base64,${scorePngBase64}` } : {}),
-          ...(message.buttonIndex === 2 ? { postUrl: `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}` } : {}),
-          ogImage: `data:image/png;base64,${anniversaryPngBase64}`,
+          ...(message.buttonIndex === 1 ? { postUrl: `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}` } : {}),
+          ogImage: `data:image/png;base64,${pngBase64}`,
           title: "My Farcaster Anniversary",
           description: `I joined Farcaster on ${joinDate} and have been a member for ${anniversary}!`,
         };
@@ -180,7 +153,7 @@ const handleRequest = frames(async (ctx) => {
 
 async function handleError(error: unknown): Promise<any> {
   const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-  const errorPngBuffer = await generatePNG('error', { errorMessage });
+  const errorPngBuffer = await generatePNG(null, null, null, true, errorMessage);
   const errorPngBase64 = errorPngBuffer.toString('base64');
   return {
     image: `data:image/png;base64,${errorPngBase64}`,
@@ -192,14 +165,14 @@ async function handleError(error: unknown): Promise<any> {
 }
 
 async function generateInitialFrame(): Promise<any> {
-  const splashPngBuffer = await generatePNG('splash', {});
-  const splashPngBase64 = splashPngBuffer.toString('base64');
+  const initialPngBuffer = await generatePNG(null, null, null);
+  const initialPngBase64 = initialPngBuffer.toString('base64');
   return {
-    image: `data:image/png;base64,${splashPngBase64}`,
+    image: `data:image/png;base64,${initialPngBase64}`,
     buttons: [
       { label: "Check Anniversary", action: "post" },
     ],
-    ogImage: `data:image/png;base64,${splashPngBase64}`,
+    ogImage: `data:image/png;base64,${initialPngBase64}`,
     title: "Check Your Farcaster Anniversary",
     description: "Find out when you joined Farcaster and how long you've been a member!",
   };
