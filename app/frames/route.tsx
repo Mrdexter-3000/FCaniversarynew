@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import sharp from 'sharp';
 import { Buffer } from 'buffer';
 import { getFarcasterUserData } from "../getFacasterUserData";
-import { ImageResponse } from '@vercel/og';
+import { generateOGImage } from "../utils";
 
 config();
 
@@ -44,19 +44,6 @@ function calculateAnniversary(createdAtTimestamp: number): string {
   if (days > 0) result += `${days} day${days > 1 ? 's' : ''}`;
 
   return result.trim() || 'Today';
-}
-
-export async function generateOGImage(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = '', isInitial: boolean = false): Promise<string> {
-  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.APP_URL || 'http://localhost:3001';
-  const params = new URLSearchParams({
-    fid: fid || '',
-    joinDate: joinDate || '',
-    anniversary: anniversary || '',
-    isError: isError.toString(),
-    errorMessage: errorMessage,
-    isInitial: isInitial.toString(),
-  });
-  return `${baseUrl}/api/og?${params.toString()}`;
 }
 
 function clearCache(fid?: string) {
@@ -153,7 +140,7 @@ async function generateInitialFrame(): Promise<any> {
       { label: "Check Anniversary", action: "post" },
     ],
     ogImage: initialImageBase64,
-    title: "Check Your Farcaster Anniversary",
+    title: "fc anniversary",
     description: "Find out when you joined Farcaster and how long you've been a member!",
   };
 }

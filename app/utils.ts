@@ -38,3 +38,16 @@ export function formatNumber(num: number): string {
     return num.toFixed(2);
   }
 }
+
+export async function generateOGImage(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = '', isInitial: boolean = false): Promise<string> {
+  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.APP_URL || 'http://localhost:3001';
+  const params = new URLSearchParams({
+    fid: fid || '',
+    joinDate: joinDate || '',
+    anniversary: anniversary || '',
+    isError: isError.toString(),
+    errorMessage: errorMessage,
+    isInitial: isInitial.toString(),
+  });
+  return `${baseUrl}/api/og?${params.toString()}`;
+}
