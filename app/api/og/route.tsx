@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   
       console.log('OG Image params:', { fid, joinDate, anniversary, isError, errorMessage });
   
-      const imageResponse = new ImageResponse(
+      return new ImageResponse(
         (
           <div
             style={{
@@ -47,9 +47,6 @@ export async function GET(req: NextRequest) {
           height: 600,
         }
       );
-  
-      console.log('ImageResponse generated successfully');
-      return imageResponse;
     } catch (error) {
       console.error('Error generating OG image:', error);
       return new Response('Error generating image: ' + (error instanceof Error ? error.message : String(error)), { status: 500 });

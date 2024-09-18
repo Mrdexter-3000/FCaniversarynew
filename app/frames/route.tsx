@@ -61,12 +61,9 @@ async function generateOGImage(fid: string | null, joinDate: string | null, anni
   try {
     const response = await fetch(imageUrl);
     console.log('OG image response status:', response.status);
-    console.log('OG image response headers:', JSON.stringify(Object.fromEntries(response.headers)));
     
     if (!response.ok) {
-      const responseText = await response.text();
-      console.error('OG image error response:', responseText);
-      throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const arrayBuffer = await response.arrayBuffer();
