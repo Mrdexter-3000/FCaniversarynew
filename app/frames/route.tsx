@@ -46,36 +46,20 @@ function calculateAnniversary(createdAtTimestamp: number): string {
   return result.trim() || 'Today';
 }
 
-async function generatePNG(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = ''): Promise<Buffer> {
-  const width = 1146;
-  const height = 600;
-
-  let svgContent = `
-    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="#f0f0f0"/>
-      <style type="text/css">
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-        .text { font-family: 'Inter', sans-serif; }
-        .title { font-size: 48px; font-weight: bold; }
-        .info { font-size: 24px; }
-        .error { font-size: 24px; fill: red; }
-      </style>
-      ${isError 
-        ? `<text x="50%" y="50%" class="text error" text-anchor="middle">${errorMessage}</text>`
-        : fid
-          ? `
-            <text x="50%" y="150" class="text title" text-anchor="middle">Farcaster Anniversary</text>
-            <text x="50%" y="250" class="text info" text-anchor="middle">FID: ${fid}</text>
-            <text x="50%" y="350" class="text info" text-anchor="middle">Joined: ${joinDate}</text>
-            <text x="50%" y="450" class="text info" text-anchor="middle">Member for: ${anniversary}</text>
-          `
-          : `<text x="50%" y="300" class="text title" text-anchor="middle">Check Your Farcaster Anniversary</text>`
-      }
-    </svg>
-  `;
-
-  const svgBuffer = Buffer.from(svgContent);
-  return sharp(svgBuffer).png().toBuffer();
+async function generateOGImage(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = ''): Promise<string> {
+  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+  const params = new URLSearchParams({
+    fid: fid || '',
+    joinDate: joinDate || '',
+    anniversary: anniversary || '',
+    isError: isError.toString(),
+    errorMessage: errorMessage,
+  });
+  const imageUrl = `${baseUrl}/api/og?${params.toString()}`;
+  const response = await fetch(imageUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const base64 = Buffer.from(arrayBuffer).toString('base64');
+  return `data:image/png;base64,${base64}`;
 }
 
 function clearCache(fid?: string) {
@@ -122,8 +106,7 @@ const handleRequest = frames(async (ctx) => {
 
         console.log(`FID: ${fid}, Timestamp: ${createdAtTimestamp}, Join Date: ${joinDate}, Anniversary: ${anniversary}`);
 
-        const pngBuffer = await generatePNG(fid.toString(), joinDate, anniversary);
-        const pngBase64 = pngBuffer.toString('base64');
+        const pngBase64 = await generateOGImage(fid.toString(), joinDate, anniversary);
 
         const shareText = `I joined Farcaster on ${joinDate} and have been a member for ${anniversary}! Check your Farcaster anniversary: `;
         const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL}/frames`;
@@ -155,26 +138,24 @@ const handleRequest = frames(async (ctx) => {
 
 async function handleError(error: unknown): Promise<any> {
   const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-  const errorPngBuffer = await generatePNG(null, null, null, true, errorMessage);
-  const errorPngBase64 = errorPngBuffer.toString('base64');
+  const errorImageBase64 = await generateOGImage(null, null, null, true, errorMessage);
   return {
-    image: `data:image/png;base64,${errorPngBase64}`,
+    image: errorImageBase64,
     buttons: [{ label: "Retry", action: "post" }],
-    ogImage: `data:image/png;base64,${errorPngBase64}`,
+    ogImage: errorImageBase64,
     title: "Farcaster Anniversary Frame Error",
     description: "An error occurred while processing your Farcaster anniversary information.",
   };
 }
 
 async function generateInitialFrame(): Promise<any> {
-  const initialPngBuffer = await generatePNG(null, null, null);
-  const initialPngBase64 = initialPngBuffer.toString('base64');
+  const initialImageBase64 = await generateOGImage(null, null, null);
   return {
-    image: `data:image/png;base64,${initialPngBase64}`,
+    image: initialImageBase64,
     buttons: [
       { label: "Check Anniversary", action: "post" },
     ],
-    ogImage: `data:image/png;base64,${initialPngBase64}`,
+    ogImage: initialImageBase64,
     title: "Check Your Farcaster Anniversary",
     description: "Find out when you joined Farcaster and how long you've been a member!",
   };
