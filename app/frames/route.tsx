@@ -60,9 +60,15 @@ async function generateOGImage(fid: string | null, joinDate: string | null, anni
   
   try {
     const response = await fetch(imageUrl);
+    console.log('OG image response status:', response.status);
+    console.log('OG image response headers:', JSON.stringify(Object.fromEntries(response.headers)));
+    
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const responseText = await response.text();
+      console.error('OG image error response:', responseText);
+      throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`);
     }
+    
     const arrayBuffer = await response.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
     return `data:image/png;base64,${base64}`;
