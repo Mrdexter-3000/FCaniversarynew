@@ -56,10 +56,21 @@ async function generateOGImage(fid: string | null, joinDate: string | null, anni
     errorMessage: errorMessage,
   });
   const imageUrl = `${baseUrl}/api/og?${params.toString()}`;
-  const response = await fetch(imageUrl);
-  const arrayBuffer = await response.arrayBuffer();
-  const base64 = Buffer.from(arrayBuffer).toString('base64');
-  return `data:image/png;base64,${base64}`;
+  console.log('Requesting OG image from:', imageUrl);
+  
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+    return `data:image/png;base64,${base64}`;
+  } catch (error) {
+    console.error('Error generating OG image:', error);
+    // Return a fallback image or throw an error
+    return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
+  }
 }
 
 function clearCache(fid?: string) {
