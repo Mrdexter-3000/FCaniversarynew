@@ -46,7 +46,7 @@ function calculateAnniversary(createdAtTimestamp: number): string {
   return result.trim() || 'Today';
 }
 
-async function generateOGImage(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = ''): Promise<string> {
+async function generateOGImage(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = '', isInitial: boolean = false): Promise<string> {
   const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
   const params = new URLSearchParams({
     fid: fid || '',
@@ -54,6 +54,7 @@ async function generateOGImage(fid: string | null, joinDate: string | null, anni
     anniversary: anniversary || '',
     isError: isError.toString(),
     errorMessage: errorMessage,
+    isInitial: isInitial.toString(),
   });
   const imageUrl = `${baseUrl}/api/og?${params.toString()}`;
   console.log('Requesting OG image from:', imageUrl);
@@ -121,7 +122,7 @@ const handleRequest = frames(async (ctx) => {
 
         console.log(`FID: ${fid}, Timestamp: ${createdAtTimestamp}, Join Date: ${joinDate}, Anniversary: ${anniversary}`);
 
-        const pngBase64 = await generateOGImage(fid.toString(), joinDate, anniversary);
+        const pngBase64 = await generateOGImage(fid.toString(), joinDate, anniversary, false, '', false);
 
         const shareText = `I joined Farcaster on ${joinDate} and have been a member for ${anniversary}! Check your Farcaster anniversary: `;
         const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL}/frames`;
@@ -164,7 +165,7 @@ async function handleError(error: unknown): Promise<any> {
 }
 
 async function generateInitialFrame(): Promise<any> {
-  const initialImageBase64 = await generateOGImage(null, null, null);
+  const initialImageBase64 = await generateOGImage(null, null, null, false, '', true);
   return {
     image: initialImageBase64,
     buttons: [
