@@ -14,8 +14,10 @@ export async function GET(req: NextRequest) {
     const isInitial = searchParams.get('isInitial') === 'true';
 
     console.log('OG Image params:', { fid, joinDate, anniversary, isError, errorMessage, isInitial });
+    console.log('Rendering text:', !isInitial && !isError);
 
-    const backgroundImage = isInitial ? '/initial-background.png' : '/result-background.png';
+    const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3001';
+    const backgroundImage = isInitial ? `${baseUrl}/initial-background.png` : `${baseUrl}/result-background.png`;
 
     return new ImageResponse(
       (
@@ -32,17 +34,16 @@ export async function GET(req: NextRequest) {
             fontFamily: 'sans-serif',
           }}
         >
-          {isError ? (
-            <div style={{ color: 'red', fontSize: 24, backgroundColor: 'rgba(255,255,255,0.8)', padding: '10px' }}>{errorMessage}</div>
-          ) : isInitial ? (
-            <div style={{ fontSize: 48, fontWeight: 'bold', backgroundColor: 'rgba(255,255,255,0.8)', padding: '20px' }}>Check Your Farcaster Anniversary</div>
-          ) : (
+          {!isInitial && !isError && (
             <>
               <div style={{ fontSize: 48, fontWeight: 'bold', marginBottom: 24, backgroundColor: 'rgba(255,255,255,0.8)', padding: '10px' }}>Farcaster Anniversary</div>
               <div style={{ fontSize: 24, marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.8)', padding: '5px' }}>FID: {fid}</div>
               <div style={{ fontSize: 24, marginBottom: 12, backgroundColor: 'rgba(255,255,255,0.8)', padding: '5px' }}>Joined: {joinDate}</div>
               <div style={{ fontSize: 24, backgroundColor: 'rgba(255,255,255,0.8)', padding: '5px' }}>Member for: {anniversary}</div>
             </>
+          )}
+          {isError && (
+            <div style={{ color: 'red', fontSize: 24, backgroundColor: 'rgba(255,255,255,0.8)', padding: '10px' }}>{errorMessage}</div>
           )}
         </div>
       ),

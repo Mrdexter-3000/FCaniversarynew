@@ -47,7 +47,7 @@ function calculateAnniversary(createdAtTimestamp: number): string {
 }
 
 async function generateOGImage(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = '', isInitial: boolean = false): Promise<string> {
-  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+  const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.APP_URL || 'http://localhost:3001';
   const params = new URLSearchParams({
     fid: fid || '',
     joinDate: joinDate || '',
@@ -69,6 +69,7 @@ async function generateOGImage(fid: string | null, joinDate: string | null, anni
     
     const arrayBuffer = await response.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
+    console.log('Generated image base64 (first 100 chars):', base64.substring(0, 100));
     return `data:image/png;base64,${base64}`;
   } catch (error) {
     console.error('Error generating OG image:', error);

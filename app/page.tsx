@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const frameMetadata = await fetchMetadata(new URL("/frames", baseUrl));
 
-  const imageUrl = `${baseUrl}/api/og`;
+  const imageUrl = `${baseUrl}/api/og?isInitial=true`;
 
   return {
     title: "Farcaster Anniversary Frame",
