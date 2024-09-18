@@ -1,6 +1,7 @@
 import { fetchMetadata } from "frames.js/next";
 import { Metadata } from "next";
 import { appURL } from "./utils";
+import { generateOGImage } from './frames/route';
 
 export async function generateMetadata(): Promise<Metadata> {
   let baseUrl = process.env.APP_URL || process.env.VERCEL_URL || 'http://localhost:3001';
@@ -10,7 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const frameMetadata = await fetchMetadata(new URL("/frames", baseUrl));
 
-  const imageUrl = `${baseUrl}/api/og?isInitial=true`;
+  // Generate the initial frame image URL
+  const initialImageUrl = await generateOGImage(null, null, null, false, '', true);
 
   return {
     title: "Farcaster Anniversary Frame",
@@ -18,11 +20,11 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: "Farcaster Anniversary Frame",
       description: "Check your Farcaster join date and anniversary",
-      images: [{ url: imageUrl }],
+      images: [{ url: initialImageUrl }],
     },
     other: {
       "fc:frame": "vNext",
-      "fc:frame:image": imageUrl,
+      "fc:frame:image": initialImageUrl,
       "fc:frame:button:1": "Check Anniversary",
       "fc:frame:post_url": `${baseUrl}/frames`,
     },

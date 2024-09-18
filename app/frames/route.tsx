@@ -46,7 +46,7 @@ function calculateAnniversary(createdAtTimestamp: number): string {
   return result.trim() || 'Today';
 }
 
-async function generateOGImage(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = '', isInitial: boolean = false): Promise<string> {
+export async function generateOGImage(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = '', isInitial: boolean = false): Promise<string> {
   const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.APP_URL || 'http://localhost:3001';
   const params = new URLSearchParams({
     fid: fid || '',
@@ -56,28 +56,8 @@ async function generateOGImage(fid: string | null, joinDate: string | null, anni
     errorMessage: errorMessage,
     isInitial: isInitial.toString(),
   });
-  const imageUrl = `${baseUrl}/api/og?${params.toString()}`;
-  console.log('Requesting OG image from:', imageUrl);
-  
-  try {
-    const response = await fetch(imageUrl);
-    console.log('OG image response status:', response.status);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    const base64 = Buffer.from(arrayBuffer).toString('base64');
-    console.log('Generated image base64 (first 100 chars):', base64.substring(0, 100));
-    return `data:image/png;base64,${base64}`;
-  } catch (error) {
-    console.error('Error generating OG image:', error);
-    // Return a fallback image or throw an error
-    return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
-  }
+  return `${baseUrl}/api/og?${params.toString()}`;
 }
-
 
 function clearCache(fid?: string) {
   if (fid) {
@@ -129,13 +109,13 @@ const handleRequest = frames(async (ctx) => {
         const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL}/frames`;
 
         return {
-          image: `data:image/png;base64,${pngBase64}`,
+          image: pngBase64,
           buttons: [
             { label: "Share", action: "post" },
             { label: "Check Again", action: "post" },
           ],
           ...(message.buttonIndex === 1 ? { postUrl: `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}` } : {}),
-          ogImage: `data:image/png;base64,${pngBase64}`,
+          ogImage: pngBase64,
           title: "My Farcaster Anniversary",
           description: `I joined Farcaster on ${joinDate} and have been a member for ${anniversary}!`,
         };
