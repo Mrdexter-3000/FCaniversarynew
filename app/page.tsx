@@ -1,7 +1,7 @@
 import { fetchMetadata } from "frames.js/next";
 import { Metadata } from "next";
 import { appURL } from "./utils";
-import { generateOGImage } from './frames/route';
+import { generateOGImage } from './utils';
 
 export async function generateMetadata(): Promise<Metadata> {
   let baseUrl = process.env.APP_URL || process.env.VERCEL_URL || 'http://localhost:3001';
