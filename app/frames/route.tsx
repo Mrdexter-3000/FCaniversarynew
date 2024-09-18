@@ -48,15 +48,18 @@ function calculateAnniversary(createdAtTimestamp: number): string {
 async function generatePNG(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = ''): Promise<Buffer> {
   const width = 1146;
   const height = 600;
+  const fontBase64 = '...';
 
   let svgContent = `
     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#f0f0f0"/>
-      <style>
-        .text { font-family: Inter, sans-serif; fill: #333; }
-        .title { font-size: 48px; font-weight: bold; }
-        .info { font-size: 36px; }
-        .error { font-size: 24px; fill: #ff0000; }
+      <style type="text/css">
+        @font-face {
+          font-family: 'Inter';
+          src: url(data:application/font-woff2;charset=utf-8;base64,${fontBase64}) format('woff2');
+          font-weight: normal;
+          font-style: normal;
+        }
       </style>
       ${isError 
         ? `<text x="50%" y="50%" class="text error" text-anchor="middle">${errorMessage}</text>`
