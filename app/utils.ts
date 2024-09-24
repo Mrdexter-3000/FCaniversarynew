@@ -29,7 +29,16 @@ export function appURL(): string {
   }
 }
 
-export async function generateOGImage(fid: string | null, joinDate: string | null, anniversary: string | null, isError: boolean = false, errorMessage: string = '', isInitial: boolean = false, awesomeText: string = ''): Promise<string> {
+export async function generateOGImage(
+  fid: string | null,
+  joinDate: string | null,
+  anniversary: string | null,
+  isError: boolean = false,
+  errorMessage: string = '',
+  isInitial: boolean = false,
+  awesomeText: string = '',
+  dataSource: string = ''
+): Promise<string> {
   const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.APP_URL || 'http://localhost:3001';
   const params = new URLSearchParams({
     fid: fid || '',

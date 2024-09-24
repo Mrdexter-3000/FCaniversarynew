@@ -17,8 +17,10 @@ export async function GET(req: NextRequest) {
     const errorMessage = searchParams.get('errorMessage');
     const isInitial = searchParams.get('isInitial') === 'true';
     const awesomeText = searchParams.get('awesomeText');
+    const dataSource = searchParams.get('dataSource');
+    const username = searchParams.get('username');
 
-    console.log('OG Image params:', { fid, joinDate, anniversary, isError, errorMessage, isInitial, awesomeText });
+    console.log('OG Image params:', { fid, joinDate, anniversary, isError, errorMessage, isInitial, awesomeText, dataSource });
 
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
@@ -70,6 +72,11 @@ export async function GET(req: NextRequest) {
               <span style={{ color: 'red', fontSize: 24 }}>{errorMessage}</span>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                {username && (
+                  <span style={{ fontSize: 36, fontWeight: 'normal', color: '#ffffff', marginBottom: 12 }}>
+                    Hello, {username}!
+                  </span>
+                )}
                 <span style={{
                   backgroundImage: 'linear-gradient(90deg, rgb(255, 77, 77), rgb(249, 203, 40))',
                   backgroundClip: 'text',
@@ -86,6 +93,7 @@ export async function GET(req: NextRequest) {
                 <span style={{ fontSize: 24, fontWeight: 'normal', color: '#ffffff', marginBottom: 12 }}>FID: {fid}</span>
                 <span style={{ fontSize: 24, fontWeight: 'normal', color: '#ffffff', marginBottom: 12 }}>Genesis Day: {joinDate}</span>
                 <span style={{ fontSize: 24, fontWeight: 'normal', color: '#ffffff' }}>My Farcaster Age: {anniversary}</span>
+                <span style={{ fontSize: 18, fontWeight: 'normal', color: '#cccccc', marginTop: 12 }}>Data source: {dataSource}</span>
               </div>
             )}
           </div>

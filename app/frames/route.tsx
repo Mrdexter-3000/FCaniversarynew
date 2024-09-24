@@ -94,20 +94,36 @@ const handleRequest = frames(async (ctx) => {
         }
 
         console.log(`Fetching data for FID: ${fid}`);
-        const createdAtTimestamp = await getFarcasterUserData(fid.toString());
-        if (createdAtTimestamp === null) {
+        const userData = await getFarcasterUserData(fid.toString());
+        console.log(`User data:`, userData);
+        if (userData.timestamp === null) {
           throw new Error("Unable to retrieve valid user data");
         }
 
-        const joinDate = new Date(createdAtTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        const anniversary = calculateAnniversary(createdAtTimestamp);
+        const joinDate = new Date(userData.timestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const anniversary = calculateAnniversary(userData.timestamp);
         const awesomeText = getAwesomeText(parseInt(fid));
 
-        console.log(`FID: ${fid}, Timestamp: ${createdAtTimestamp}, Join Date: ${joinDate}, Anniversary: ${anniversary}`);
+        console.log(`FID: ${fid}, Timestamp: ${userData.timestamp}, Join Date: ${joinDate}, Anniversary: ${anniversary}, Username: ${userData.username}`);
 
-        const pngBase64 = await generateOGImage(fid.toString(), joinDate, anniversary, false, '', false, awesomeText);
+        // Add a note about the data source
+        const dataSource = "Airstack & Farcaster Registry";
+        console.log(`Data source: ${dataSource}`);
 
-        const shareText = `I joined Farcaster on ${joinDate} and have been a member since ${anniversary}! Frame by @0xdexter Check your Farcaster stats: `;
+        const greeting = userData.username ? `Hello, ${userData.username}! ` : '';
+
+        const pngBase64 = await generateOGImage(
+          fid.toString(),
+          joinDate,
+          anniversary,
+          false,
+          '',
+          false,
+          awesomeText,
+          dataSource
+        );
+
+        const shareText = `${greeting} I joined Farcaster on ${joinDate} and have been a member since ${anniversary}! Frame by @0xdexter Check your Farcaster stats: `;
         const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(`${process.env.APP_URL}/frames?userfid=${fid}`)}`;
 
         return {
@@ -139,7 +155,7 @@ const handleRequest = frames(async (ctx) => {
 
 async function handleError(error: unknown): Promise<any> {
   const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-  const errorImageBase64 = await generateOGImage(null, null, null, true, errorMessage);
+  const errorImageBase64 = await generateOGImage(null, null, null, true, errorMessage, false, '', '');
   return {
     image: errorImageBase64,
     buttons: [{ label: "Retry", action: "post" }],
