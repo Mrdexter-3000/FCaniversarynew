@@ -108,16 +108,15 @@ const handleRequest = frames(async (ctx) => {
         const pngBase64 = await generateOGImage(fid.toString(), joinDate, anniversary, false, '', false, awesomeText);
 
         const shareText = `${awesomeText} I joined Farcaster on ${joinDate} and have been a member since ${anniversary}! Frame by @0xdexter Check your Farcaster stats: `;
-        const shareUrl = `${process.env.APP_URL}/frames`;
+        const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(`${process.env.APP_URL}/frames?userfid=${fid}`)}`;
 
         return {
           image: pngBase64,
           buttons: [
-            { label: "Share", action: "post" },
+            { label: "Share", action: "link", target: shareUrl },
             { label: "Check Again", action: "post" },
             { label: "Home", action: "post" },
           ],
-          ...(message.buttonIndex === 1 ? { postUrl: `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}` } : {}),
           ogImage: pngBase64,
           title: "My Farcaster Journey",
           description: `${awesomeText} I joined Farcaster on ${joinDate} and have been a member for ${anniversary}!`,
