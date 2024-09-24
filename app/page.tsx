@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const frameMetadata = await fetchMetadata(new URL("/frames", baseUrl));
 
   // Generate the initial frame image URL
-  const initialImageUrl = await generateOGImage(null, null, null, false, '', true);
+  const initialImageUrl = `${baseUrl}/initial-animation.gif`;
 
   return {
     title: "Farcaster Anniversary Frame",

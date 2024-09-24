@@ -56,6 +56,16 @@ function clearCache(fid?: string) {
   }
 }
 
+function getAwesomeText(fid: number): string {
+  if (fid <= 1000) return "Wow! You're a Farcaster OG! 🏆";
+  if (fid <= 5000) return "Amazing! You're a Farcaster pioneer! 🌟";
+  if (fid <= 10000) return "Fantastic! You're an early Farcaster adopter! 🎉";
+  if (fid <= 50000) return "Awesome! You're a Farcaster enthusiast! 🚀";
+  if (fid <= 100000) return "Great! You're really getting into Farcaster! 💪";
+  if (fid <= 500000) return "Welcome aboard! You're part of the Farcaster community! 🌱";
+  return "Welcome to Farcaster! Your journey begins now! 🎊";
+}
+
 const handleRequest = frames(async (ctx) => {
   try {
     if (!ctx.request) {
@@ -74,6 +84,10 @@ const handleRequest = frames(async (ctx) => {
           throw new Error("Invalid Farcaster Frame message");
         }
 
+        if (message.buttonIndex === 3) {
+          return await generateInitialFrame();
+        }
+
         const fid = message.fid;
         if (!fid) {
           throw new Error("Invalid Farcaster Frame message: Missing FID");
@@ -87,30 +101,34 @@ const handleRequest = frames(async (ctx) => {
 
         const joinDate = new Date(createdAtTimestamp * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         const anniversary = calculateAnniversary(createdAtTimestamp);
+        const awesomeText = getAwesomeText(parseInt(fid));
 
         console.log(`FID: ${fid}, Timestamp: ${createdAtTimestamp}, Join Date: ${joinDate}, Anniversary: ${anniversary}`);
 
-        const pngBase64 = await generateOGImage(fid.toString(), joinDate, anniversary, false, '', false);
+        const pngBase64 = await generateOGImage(fid.toString(), joinDate, anniversary, false, '', false, awesomeText);
 
-        const shareText = `I joined Farcaster on ${joinDate} and have been a member for ${anniversary}! Check your Farcaster anniversary: `;
-        const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL}/frames`;
+        const shareText = `${awesomeText} I joined Farcaster on ${joinDate} and have been a member since ${anniversary}! Frame by @0xdexter Check your Farcaster stats: `;
+        const shareUrl = `${process.env.APP_URL}/frames`;
 
         return {
           image: pngBase64,
           buttons: [
             { label: "Share", action: "post" },
             { label: "Check Again", action: "post" },
+            { label: "Home", action: "post" },
           ],
           ...(message.buttonIndex === 1 ? { postUrl: `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}` } : {}),
           ogImage: pngBase64,
-          title: "My Farcaster Anniversary",
-          description: `I joined Farcaster on ${joinDate} and have been a member for ${anniversary}!`,
+          title: "My Farcaster Journey",
+          description: `${awesomeText} I joined Farcaster on ${joinDate} and have been a member for ${anniversary}!`,
         };
       } catch (error) {
         console.error("Error processing POST request:", error);
         return await handleError(error);
       }
+      
     } else {
+    
       // Initial frame content
       return await generateInitialFrame();
     }
@@ -133,15 +151,15 @@ async function handleError(error: unknown): Promise<any> {
 }
 
 async function generateInitialFrame(): Promise<any> {
-  const initialImageBase64 = await generateOGImage(null, null, null, false, '', true);
+  const initialImageUrl = `${process.env.APP_URL}/initial-animation.gif`;
   return {
-    image: initialImageBase64,
+    image: initialImageUrl,
     buttons: [
-      { label: "Check Anniversary", action: "post" },
+      { label: "Check My Stats", action: "post" },
     ],
-    ogImage: initialImageBase64,
-    title: "fc anniversary",
-    description: "Find out when you joined Farcaster and how long you've been a member!",
+    ogImage: initialImageUrl,
+    title: "Farcaster Stats",
+    description: "Discover your Farcaster journey! Find out when you joined and your Farcaster rank.",
   };
 }
 

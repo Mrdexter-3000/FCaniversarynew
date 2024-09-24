@@ -17,7 +17,11 @@ export default {
     "../../node_modules/@frames.js/render/dist/**/*.{ts,tsx,js,css}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        bungee: ["Bungee", "sans-serif"],
+      },
+    },
   },
   plugins: [],
 }
