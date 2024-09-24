@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     const response = {
       fid: user.userId,
       createdAtTimestamp: new Date(user.userCreatedAtBlockTimestamp).getTime() / 1000,
-      profileName: user.profileName,
+      username: user.profileName || null,
       profileDisplayName: user.profileDisplayName,
       profileImage: user.profileImageContentValue?.image?.extraSmall || user.profileImage,
       socialCapitalScore: user.socialCapital?.socialCapitalScore,

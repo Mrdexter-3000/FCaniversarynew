@@ -37,7 +37,7 @@ export async function generateOGImage(
   errorMessage: string = '',
   isInitial: boolean = false,
   awesomeText: string = '',
-  dataSource: string = ''
+  username: string = ''
 ): Promise<string> {
   const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.APP_URL || 'http://localhost:3001';
   const params = new URLSearchParams({
@@ -48,6 +48,7 @@ export async function generateOGImage(
     errorMessage: errorMessage,
     isInitial: isInitial.toString(),
     awesomeText: awesomeText,
+    username: username
   });
   return `${baseUrl}/api/og?${params.toString()}`;
 }

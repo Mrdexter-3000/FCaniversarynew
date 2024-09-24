@@ -15,12 +15,16 @@ query GetFarcasterUser($fid: String!) {
     Social {
       userId
       userCreatedAtBlockTimestamp
+      profileName
+      profileDisplayName
+    
+      
     }
   }
 }
 `;
 
-export async function getFarcasterUserData(fid: string): Promise<{ timestamp: number | null; username: string | null }> {
+export async function getFarcasterUserData(fid: string): Promise<{ timestamp: number | null; profileName: string | null; profileDisplayName: string | null }> {
   try {
     // Get username from Airstack
     const airstackData = await fetchAirstackData(fid);
@@ -30,18 +34,19 @@ export async function getFarcasterUserData(fid: string): Promise<{ timestamp: nu
     
     return {
       timestamp: farcasterData,
-      username: airstackData?.username || null
+      profileName: airstackData?.profileName || null,
+      profileDisplayName: airstackData?.profileDisplayName || null
     };
   } catch (error) {
     console.error('Error fetching user data:', error);
-    return { timestamp: null, username: null };
+    return { timestamp: null, profileName: null, profileDisplayName: null };
   }
 }
 
-async function fetchAirstackData(fid: string): Promise<{ username: string } | null> {
+async function fetchAirstackData(fid: string): Promise<{ profileName: string, profileDisplayName: string } | null> {
   const userData = await fetchQuery(userQuery, { fid });
   if (userData.error || !userData.data.Socials.Social[0]) return null;
-  return { username: userData.data.Socials.Social[0].profileName || userData.data.Socials.Social[0].profileDisplayName };
+  return { profileName: userData.data.Socials.Social[0].profileName, profileDisplayName: userData.data.Socials.Social[0].profileDisplayName };
 }
 
 async function fetchFarcasterData(fid: string): Promise<number | null> {

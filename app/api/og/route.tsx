@@ -7,6 +7,18 @@ const bungeeFont = fetch(
   new URL('../../assets/Bungee-Regular.ttf', import.meta.url)
 ).then((res) => res.arrayBuffer());
 
+const tomorrowLightFont = fetch(
+  new URL('../../assets/Tomorrow/Tomorrow-Light.ttf', import.meta.url)
+).then((res) => res.arrayBuffer());
+
+const tomorrowRegularFont = fetch(
+  new URL('../../assets/Tomorrow/Tomorrow-Regular.ttf', import.meta.url)
+).then((res) => res.arrayBuffer());
+
+const tomorrowBoldFont = fetch(
+  new URL('../../assets/Tomorrow/Tomorrow-Bold.ttf', import.meta.url)
+).then((res) => res.arrayBuffer());
+
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
@@ -17,10 +29,9 @@ export async function GET(req: NextRequest) {
     const errorMessage = searchParams.get('errorMessage');
     const isInitial = searchParams.get('isInitial') === 'true';
     const awesomeText = searchParams.get('awesomeText');
-    const dataSource = searchParams.get('dataSource');
     const username = searchParams.get('username');
 
-    console.log('OG Image params:', { fid, joinDate, anniversary, isError, errorMessage, isInitial, awesomeText, dataSource });
+    console.log('OG Image params:', { fid, joinDate, anniversary, isError, errorMessage, isInitial, awesomeText, username });
 
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
@@ -31,7 +42,11 @@ export async function GET(req: NextRequest) {
 
     console.log('Using background image:', backgroundImage);
 
-    const fontData = await bungeeFont;
+    const bungeeFontData = await bungeeFont;
+    const tomorrowLightFontData = await tomorrowLightFont;
+    const tomorrowRegularFontData = await tomorrowRegularFont;
+    const tomorrowBoldFontData = await tomorrowBoldFont;
+
 
     return new ImageResponse(
       (
@@ -47,6 +62,7 @@ export async function GET(req: NextRequest) {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             fontFamily: 'Bungee',
+            fontWeight: '400',
           }}
         >
           <div
@@ -55,8 +71,8 @@ export async function GET(req: NextRequest) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: 'linear-gradient(110.37deg, #6B50A4 -4.1%, rgba(0, 0, 0, 0.3) 118.81%)',
-              backgroundBlendMode: 'plus-lighter',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              backgroundBlendMode: 'normal',
               border: '1px solid rgba(0, 0, 0, 0.3)',
               borderRadius: '6px',
               padding: '50px',
@@ -78,22 +94,31 @@ export async function GET(req: NextRequest) {
                   </span>
                 )}
                 <span style={{
-                  backgroundImage: 'linear-gradient(90deg, rgb(255, 77, 77), rgb(249, 203, 40))',
+                  fontFamily: 'Bungee',
+                  backgroundImage: 'linear-gradient(90deg, rgb(0, 124, 240), rgb(0, 223, 216))',
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   color: 'transparent',
                   fontSize: 60,
-                  marginBottom: 24,
+                  
+                  fontWeight: '400',
+                  
                 }}>
                   Your Farcaster Journey
                 </span>    
-                <span style={{textIndent: '10px', textAlign: 'center', fontSize: 36, fontWeight: 'normal', color: '#ffffff', marginBottom: 24 }}>
+                <span style={{fontFamily: 'Tomorrow',  
+                textAlign: 'center', fontSize: 36, 
+                fontWeight: '700', 
+                
+               
+                color: 'white',
+                margin: '34px 0px' 
+                }}>
                   {awesomeText}
                 </span>
-                <span style={{ fontSize: 24, fontWeight: 'normal', color: '#ffffff', marginBottom: 12 }}>FID: {fid}</span>
-                <span style={{ fontSize: 24, fontWeight: 'normal', color: '#ffffff', marginBottom: 12 }}>Genesis Day: {joinDate}</span>
-                <span style={{ fontSize: 24, fontWeight: 'normal', color: '#ffffff' }}>My Farcaster Age: {anniversary}</span>
-                <span style={{ fontSize: 18, fontWeight: 'normal', color: '#cccccc', marginTop: 12 }}>Data source: {dataSource}</span>
+                
+                <span style={{ fontFamily: 'Tomorrow', fontSize: 27, fontWeight: '400', color: '#ffffff', marginBottom: 12 }}>Genesis Day: {joinDate}</span>
+                <span style={{ fontFamily: 'Tomorrow', fontSize: 27, fontWeight: '400', color: '#ffffff' }}>My Farcaster Age: {anniversary}</span>
               </div>
             )}
           </div>
@@ -105,9 +130,27 @@ export async function GET(req: NextRequest) {
         fonts: [
           {
             name: 'Bungee',
-            data: fontData,
+            data: bungeeFontData,
             style: 'normal',
             weight: 400,
+          },
+          {
+            name: 'Tomorrow',
+            data: tomorrowLightFontData,
+            style: 'normal',
+            weight: 300,
+          },
+          {
+            name: 'Tomorrow',
+            data: tomorrowRegularFontData,
+            style: 'normal',
+            weight: 400,
+          },
+          {
+            name: 'Tomorrow',
+            data: tomorrowBoldFontData,
+            style: 'normal',
+            weight: 700,
           },
         ],
       }
