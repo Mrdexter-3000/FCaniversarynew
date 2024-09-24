@@ -107,7 +107,7 @@ const handleRequest = frames(async (ctx) => {
 
         const pngBase64 = await generateOGImage(fid.toString(), joinDate, anniversary, false, '', false, awesomeText);
 
-        const shareText = `${awesomeText} I joined Farcaster on ${joinDate} and have been a member since ${anniversary}! Frame by @0xdexter Check your Farcaster stats: `;
+        const shareText = `I joined Farcaster on ${joinDate} and have been a member since ${anniversary}! Frame by @0xdexter Check your Farcaster stats: `;
         const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(`${process.env.APP_URL}/frames?userfid=${fid}`)}`;
 
         return {
