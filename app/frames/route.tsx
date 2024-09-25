@@ -46,15 +46,7 @@ function calculateAnniversary(createdAtTimestamp: number): string {
   return result.trim() || 'Today';
 }
 
-function clearCache(fid?: string) {
-  if (fid) {
-    delete userCache[fid];
-    console.log(`Cache cleared for FID ${fid}`);
-  } else {
-    Object.keys(userCache).forEach(key => delete userCache[key]);
-    console.log("Entire cache cleared");
-  }
-}
+
 
 function getAwesomeText(fid: number, username: string | null): string {
   const replaceUsername = (text: string) => text.replace('{username}', username ? `${username}! ` : '');
@@ -87,7 +79,7 @@ const handleRequest = frames(async (ctx) => {
         }
 
         if (message.buttonIndex === 3) {
-          clearCache();
+          
           return await generateInitialFrame();
         }
 
