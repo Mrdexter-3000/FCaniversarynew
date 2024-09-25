@@ -1,8 +1,6 @@
 import { frames } from "./frames";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { config } from "dotenv";
-import sharp from 'sharp';
-import { Buffer } from 'buffer';
 import { getFarcasterUserData } from "../getFacasterUserData";
 import { generateOGImage } from "../utils";
 
@@ -13,16 +11,16 @@ if (!AIRSTACK_API_KEY) {
   console.error("AIRSTACK_API_KEY is not set in the environment variables");
 }
 
-const userCache: { [fid: string]: { timestamp: number, lastChecked: number } } = {};
+const userCache: { [fid: string]: { timestamp: number; lastChecked: number } } = {};
 
 function calculateAnniversary(createdAtTimestamp: number): string {
   const createdAt = new Date(createdAtTimestamp * 1000);
   const now = new Date();
-  
+
   if (createdAt > now) {
     return "Not joined yet";
   }
-  
+
   let years = now.getFullYear() - createdAt.getFullYear();
   let months = now.getMonth() - createdAt.getMonth();
   let days = now.getDate() - createdAt.getDate();
@@ -43,21 +41,19 @@ function calculateAnniversary(createdAtTimestamp: number): string {
   if (months > 0) result += `${months} month${months > 1 ? 's' : ''} `;
   if (days > 0) result += `${days} day${days > 1 ? 's' : ''}`;
 
-  return result.trim() || 'Today';
+  return result.trim();
 }
-
-
 
 function getAwesomeText(fid: number, username: string | null): string {
   const replaceUsername = (text: string) => text.replace('{username}', username ? `${username}! ` : '');
 
-  if (fid <= 1000) return replaceUsername("wow! {username}You're a Farcaster OG! 🏆");
-  if (fid <= 5000) return replaceUsername("amazing! {username}You're a Farcaster pioneer! 🌟");
-  if (fid <= 10000) return replaceUsername("fantastic! {username}You're an early Farcaster adopter! 🎉");
+  if (fid <= 1000) return replaceUsername("Wow! {username}You're a Farcaster OG! 🏆");
+  if (fid <= 5000) return replaceUsername("Amazing! {username}You're a Farcaster pioneer! 🌟");
+  if (fid <= 10000) return replaceUsername("Fantastic! {username}You're an early Farcaster adopter! 🎉");
   if (fid <= 50000) return replaceUsername("Awesome! {username}You're a Farcaster enthusiast! 🚀");
-  if (fid <= 100000) return replaceUsername("great! {username}You're really getting into Farcaster! 💪");
-  if (fid <= 500000) return replaceUsername("welcome aboard {username}You're part of the Farcaster community! 🌱");
-  return replaceUsername("welcome to farcaster {username} Your journey begins now! 🎊");
+  if (fid <= 100000) return replaceUsername("Great! {username}You're really getting into Farcaster! 💪");
+  if (fid <= 500000) return replaceUsername("Welcome aboard {username}You're part of the Farcaster community! 🌱");
+  return replaceUsername("Thanks for being with Farcaster, {username}! 🎊");
 }
 
 const handleRequest = frames(async (ctx) => {
@@ -130,8 +126,27 @@ const handleRequest = frames(async (ctx) => {
         return await handleError(error);
       }
     } else {
-      // Initial frame content
-      return await generateInitialFrame();
+      // Cast ctx.request to NextRequest to access nextUrl
+      const request = ctx.request as NextRequest;
+      const searchParams = request.nextUrl.searchParams;
+      const isResult = searchParams.get('isResult') === 'true';
+      const isShare = searchParams.get('isShare') === 'true';
+      const fid = searchParams.get('fid');
+
+      console.log("Handling request with parameters:", { isResult, isShare, fid });
+
+      if (isResult || isShare) {
+        console.log(`Fetching results frame for FID: ${fid}`);
+        if (!fid) {
+          throw new Error("Missing FID in result or share frame");
+        }
+        const response = await fetch(`${process.env.APP_URL}/frames?isResult=true&isShare=true&fid=${fid}`);
+        const data = await response.json();
+        return data;
+      } else {
+        console.log("Serving initial frame");
+        return await generateInitialFrame();
+      }
     }
   } catch (error) {
     console.error("Unhandled error in handleRequest:", error);

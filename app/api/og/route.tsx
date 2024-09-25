@@ -1,23 +1,9 @@
 import { ImageResponse } from '@vercel/og';
 import { NextRequest } from 'next/server';
 
+
+
 export const runtime = 'edge';
-
-const bungeeFont = fetch(
-  new URL('../../assets/Bungee-Regular.ttf', import.meta.url)
-).then((res) => res.arrayBuffer());
-
-const tomorrowLightFont = fetch(
-  new URL('../../assets/Tomorrow/Tomorrow-Light.ttf', import.meta.url)
-).then((res) => res.arrayBuffer());
-
-const tomorrowRegularFont = fetch(
-  new URL('../../assets/Tomorrow/Tomorrow-Regular.ttf', import.meta.url)
-).then((res) => res.arrayBuffer());
-
-const tomorrowBoldFont = fetch(
-  new URL('../../assets/Tomorrow/Tomorrow-Bold.ttf', import.meta.url)
-).then((res) => res.arrayBuffer());
 
 export async function GET(req: NextRequest) {
   try {
@@ -30,6 +16,7 @@ export async function GET(req: NextRequest) {
     const isInitial = searchParams.get('isInitial') === 'true';
     const awesomeText = searchParams.get('awesomeText');
     const username = searchParams.get('username');
+    
 
     console.log('OG Image params:', { fid, joinDate, anniversary, isError, errorMessage, isInitial, awesomeText, username });
 
@@ -41,6 +28,23 @@ export async function GET(req: NextRequest) {
       : `${baseUrl}/result-background.png`;
 
     console.log('Using background image:', backgroundImage);
+
+    const bungeeFont = fetch(
+      new URL('../../assets/Bungee-Regular.ttf', import.meta.url)
+    ).then((res) => res.arrayBuffer());
+    
+    const tomorrowLightFont = fetch(
+      new URL('../../assets/Tomorrow/Tomorrow-Light.ttf', import.meta.url)
+    ).then((res) => res.arrayBuffer());
+    
+    const tomorrowRegularFont = fetch(
+      new URL('../../assets/Tomorrow/Tomorrow-Regular.ttf', import.meta.url)
+    ).then((res) => res.arrayBuffer());
+    
+    const tomorrowBoldFont = fetch(
+      new URL('../../assets/Tomorrow/Tomorrow-Bold.ttf', import.meta.url)
+    ).then((res) => res.arrayBuffer());
+    
 
     const bungeeFontData = await bungeeFont;
     const tomorrowLightFontData = await tomorrowLightFont;

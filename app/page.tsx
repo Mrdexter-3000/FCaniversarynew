@@ -1,5 +1,5 @@
 import { fetchMetadata } from "frames.js/next";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { appURL } from "./utils";
 import { generateOGImage } from './utils';
 
@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
     if (!fid) {
       throw new Error("Missing FID in result or share frame");
     }
-    const response = await fetch(`${baseUrl.toString()}/frames?isResult=true&isShare=true&fid=${fid}`);
+    const response = await fetch(`${baseUrl}/frames?isResult=true&isShare=true&fid=${fid}`);
     const data = await response.json();
     imageUrl = data.image;
   } else {
