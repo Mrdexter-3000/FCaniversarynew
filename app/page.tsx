@@ -10,9 +10,22 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   const frameMetadata = await fetchMetadata(new URL("/frames", baseUrl));
+  const searchParams = new URLSearchParams(frameMetadata.requestUrl?.toString() || '');
+  const isResult = searchParams.get('isResult') === 'true';
+  const isShare = searchParams.get('isShare') === 'true';
+  const fid = searchParams.get('fid');
 
-  // Generate the initial frame image URL
-  const initialImageUrl = `${baseUrl}/initial-animation.gif`;
+  let imageUrl: string;
+  if (isResult || isShare) {
+    if (!fid) {
+      throw new Error("Missing FID in result or share frame");
+    }
+    const response = await fetch(`${baseUrl.toString()}/frames?isResult=true&isShare=true&fid=${fid}`);
+    const data = await response.json();
+    imageUrl = data.image;
+  } else {
+    imageUrl = `${baseUrl}/initial-animation.gif`;
+  }
 
   return {
     title: "Farcaster Anniversary Frame",
@@ -20,12 +33,12 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: "Farcaster Anniversary Frame",
       description: "Check your Farcaster join date and anniversary",
-      images: [{ url: initialImageUrl }],
+      images: [{ url: imageUrl }],
     },
     other: {
       "fc:frame": "vNext",
-      "fc:frame:image": initialImageUrl,
-      "fc:frame:button:1": "Check Anniversary",
+      "fc:frame:image": imageUrl,
+      "fc:frame:button:1": isResult || isShare ? "Check Again" : "Check Anniversary",
       "fc:frame:post_url": `${baseUrl}/frames`,
     },
   };

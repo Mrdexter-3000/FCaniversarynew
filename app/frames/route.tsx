@@ -56,7 +56,7 @@ function getAwesomeText(fid: number, username: string | null): string {
   if (fid <= 10000) return replaceUsername("fantastic! {username}You're an early Farcaster adopter! 🎉");
   if (fid <= 50000) return replaceUsername("Awesome! {username}You're a Farcaster enthusiast! 🚀");
   if (fid <= 100000) return replaceUsername("great! {username}You're really getting into Farcaster! 💪");
-  if (fid <= 500000) return replaceUsername("welcome aboard! {username}You're part of the Farcaster community! 🌱");
+  if (fid <= 500000) return replaceUsername("welcome aboard {username}You're part of the Farcaster community! 🌱");
   return replaceUsername("welcome to farcaster {username} Your journey begins now! 🎊");
 }
 
@@ -79,7 +79,6 @@ const handleRequest = frames(async (ctx) => {
         }
 
         if (message.buttonIndex === 3) {
-          
           return await generateInitialFrame();
         }
 
@@ -101,12 +100,6 @@ const handleRequest = frames(async (ctx) => {
 
         console.log(`FID: ${fid}, Timestamp: ${userData.timestamp}, Join Date: ${joinDate}, Anniversary: ${anniversary}, Username: ${userData.profileName}`);
 
-        // Add a note about the data source
-        const dataSource = "Airstack & Farcaster Registry";
-        console.log(`Data source: ${dataSource}`);
-
-          const greeting = userData.profileName ? `Hello, ${userData.profileName}! ` : '';
-
         const pngBase64 = await generateOGImage(
           fid.toString(),
           joinDate,
@@ -115,11 +108,11 @@ const handleRequest = frames(async (ctx) => {
           '',
           false,
           awesomeText,
-          
+          userData.profileName || ''
         );
 
-        const shareText = `I joined Farcaster on ${joinDate} and have been a member since ${anniversary}! Check your Farcaster stats: Frame by @0xdexter `;
-        const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(`${process.env.APP_URL}/frames?userfid=${fid}`)}`;
+        const shareText = `I joined Farcaster on ${joinDate} and have been a member since ${anniversary}! Check your Farcaster stats: Frame by @0xdexter`;
+        const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(`${process.env.APP_URL}/frames?isResult=true&isShare=true&fid=${fid}`)}`;
 
         return {
           image: pngBase64,
@@ -136,9 +129,7 @@ const handleRequest = frames(async (ctx) => {
         console.error("Error processing POST request:", error);
         return await handleError(error);
       }
-      
     } else {
-    
       // Initial frame content
       return await generateInitialFrame();
     }

@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 {username && (
                   <span style={{ fontSize: 36, fontWeight: 'normal', color: '#ffffff', marginBottom: 12 }}>
-                    Hello, {username}!
+                    
                   </span>
                 )}
                 <span style={{
