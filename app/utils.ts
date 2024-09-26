@@ -1,4 +1,7 @@
 import { headers } from "next/headers";
+import sharp from 'sharp';
+import fs from 'fs/promises';
+import path from 'path';
 
 export function currentURL(pathname: string): URL {
   try {
@@ -51,4 +54,17 @@ export async function generateOGImage(
     username: username
   });
   return `${baseUrl}/api/og?${params.toString()}`;
+}
+
+export async function optimizeGif(inputPath: string, outputPath: string): Promise<void> {
+  const buffer = await fs.readFile(inputPath);
+  await sharp(buffer, { animated: true })
+    .gif({
+      colors: 128, // Reduce color palette
+      dither: 0.5, // Apply dithering
+      interFrameMaxError: 5, // Allow some loss between frames
+    })
+    .toFile(outputPath);
+  
+  console.log(`GIF optimized: ${outputPath}`);
 }

@@ -87,7 +87,7 @@ const handleRequest = frames(async (ctx) => {
         }
 
         if (message.buttonIndex === 3) {
-          clearCache();
+      
           return await generateInitialFrame();
         }
 
@@ -169,7 +169,7 @@ async function handleError(error: unknown): Promise<any> {
 }
 
 async function generateInitialFrame(): Promise<any> {
-  const initialImageUrl = `${process.env.APP_URL}/initial-animation.webp`;
+  const initialImageUrl = `${process.env.APP_URL}/Int-animation.gif`;
   return {
     image: initialImageUrl,
     buttons: [
@@ -181,5 +181,17 @@ async function generateInitialFrame(): Promise<any> {
   };
 }
 
-export const GET = handleRequest;
+export const GET = async (req: NextRequest) => {
+  const response = await handleRequest(req);
+  
+  // Add caching headers
+  const headers = new Headers(response.headers);
+  headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+  
+  return new Response(response.body, {
+    status: response.status,
+    headers: headers,
+  });
+};
+
 export const POST = handleRequest;
