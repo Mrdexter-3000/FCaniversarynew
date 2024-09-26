@@ -169,7 +169,11 @@ async function handleError(error: unknown): Promise<any> {
 }
 
 async function generateInitialFrame(): Promise<any> {
-  const initialImageUrl = `${process.env.APP_URL}/initial-animation-optimized.gif`;
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}` 
+    : process.env.APP_URL || 'http://localhost:3001';
+  const initialImageUrl = `${baseUrl}/initial-animation-optimized.gif`;
+  console.log('Initial frame image URL:', initialImageUrl);
   return {
     image: initialImageUrl,
     buttons: [
