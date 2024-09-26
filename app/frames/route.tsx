@@ -169,7 +169,7 @@ async function handleError(error: unknown): Promise<any> {
 }
 
 async function generateInitialFrame(): Promise<any> {
-  const initialImageUrl = `${process.env.APP_URL}/Int-animation.gif`;
+  const initialImageUrl = `${process.env.APP_URL}/initial-animation-optimized.gif`;
   return {
     image: initialImageUrl,
     buttons: [

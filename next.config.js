@@ -7,7 +7,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/Int-animation.gif',
+        source: '/initial-animation-optimized.gif',
         headers: [
           {
             key: 'Cache-Control',
