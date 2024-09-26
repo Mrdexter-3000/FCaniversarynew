@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost', 'fc-aniversary-v3.vercel.app'],
+    domains: ['localhost', 'https://fc-aniversary-v3.vercel.app/'],
   },
   async headers() {
     return [
